@@ -13,21 +13,6 @@ func RootHandler(res http.ResponseWriter, req *http.Request) {
 // ListWinners returns winners from the list
 func ListWinners(res http.ResponseWriter, req *http.Request) {
 	year := req.URL.Query().Get("year")
-	//	res.Header().Set("Content-Type", "application/json")
-	//	if year == "" {
-	//		allWinners, err := data.ListAllJSON()
-	//		if err != nil {
-	//			res.Write(allWinners)
-	//		}
-	//		res.WriteHeader(http.StatusInternalServerError)
-	//	} else {
-	//		yearWinners, err := data.ListAllByYear(year)
-	//		if err != nil {
-	//			res.Write(yearWinners)
-	//		}
-	//		res.WriteHeader(http.StatusInternalServerError)
-	//	}
-	//	return
 
 	if year == "" {
 		allWinners, err := data.ListAllJSON()
@@ -50,6 +35,20 @@ func ListWinners(res http.ResponseWriter, req *http.Request) {
 
 // AddNewWinner adds new winner to the list
 func AddNewWinner(res http.ResponseWriter, req *http.Request) {
+	accessToken := req.Header.Get("X-ACCESS-TOKEN")
+	isTokenValid := data.IsAccessTokenValid(accessToken)
+	if !isTokenValid {
+		res.WriteHeader(http.StatusUnauthorized)
+		return
+	} else {
+		res.WriteHeader(http.StatusCreated)
+		err := data.AddNewWinner(req.Body)
+		if err != nil {
+			res.WriteHeader(http.StatusUnprocessableEntity)
+			return
+		}
+		return
+	}
 
 }
 
